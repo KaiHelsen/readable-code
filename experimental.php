@@ -1,7 +1,13 @@
 <?php
 declare(strict_types=1);
 
-
+/**
+ * Pizza class
+ *
+ * The Pizza class is meant to contain information about a pizza, specifically the name, the price, and whether it is a valid pizza.
+ * Hawaii pizza is NOT valid pizza.
+ * Class Pizza
+ */
 class Pizza
 {
     private string $name;
@@ -32,35 +38,52 @@ class Pizza
 }
 
 /**
- * this function orders a pizza for a customer and echoes details about the order
- * @param Pizza $pizza pizza object to be ordered
- * @param string $forWho who the pizza is being ordered for
+ * Class Customer
+ *
+ * Customer Class is intended to retain the name and location of a customer
  */
-function orderPizza(Pizza $pizza, string $forWho): void
+class Customer
 {
-    //validate pizza
-    if(!$pizza->isValid())
+    private string $name;
+    private string $location;
+
+    public function __construct(string $name, string $location)
     {
-        return;
+        $this->name = $name;
+        $this->location = $location;
     }
 
-    echo "Creating new order... <br>";
-    $totalPrice = $pizza->getPrice();
-
-    // TODO: for now this is fine but in the long run, it'd be nicer to replace this with objects.
-    $address = match ($forWho)
+    public function getName(): string
     {
-        'koen' => 'a yacht in Antwerp',
-        'manuele' => 'somewhere in Belgium',
-        'students' => 'BeCode office',
-        default => 'unknown'
-    };
+        return $this->name;
+    }
 
-    echo "A " . $pizza->getName() . " pizza should be sent to " . $forWho . "<br>";
-    echo "The address: " . $address . "<br>";
-    echo "The bill is €" . $totalPrice . "<br>";
+    public function getLocation(): string
+    {
+        return $this->location;
+    }
 
+}
 
+/**
+ * this function orders a pizza for a customer and echoes details about the order
+ * @param Pizza $pizza pizza object to be ordered
+ * @param Customer $customer customer to whom the pizza is to be sent
+ * @throws Exception when the pizza is not valid this function will throw an exception. No pineapple here!
+ */
+function orderPizza(Pizza $pizza, Customer $customer): void
+{
+    //validate pizza
+    if (!$pizza->isValid())
+    {
+        throw new Exception('computer says no');
+    }
+
+    //echo order confirmation and information
+    echo "Creating new order... <br>";
+    echo "A " . $pizza->getName() . " pizza should be sent to " . $customer->getName() . "<br>";
+    echo "The address: " . $customer->getName() . "<br>";
+    echo "The bill is €" . $pizza->getPrice() . "<br>";
     echo "Order finished.<br><br>";
 }
 
@@ -74,43 +97,33 @@ function test(Pizza $pizza): void
     echo "Test: type is " . $pizza->getName() . "<br>";
 }
 
-
-/**
- * !!DEPRECATED!!
- * original intent was to calculate the cost of a pizza by the name of the pizza.
- * this functionality has been relegated to the pizza class itself, so every pizza object knows its own price.
- * however, we're keeping this chunk of code around for now because it has some legacy code on handling non-valid pizzas like hawaii
- *
- * TODO: implement throw exception for invalid pizza and remove this function entirely.
- *
- * TODO: replace with some sort of validation function
- * @param Pizza $pizza Pizza we need the price for
- * @return int price of the pizza
- * @throws Exception exception is thrown in case the computer does not like this particular pizza.
- */
-function calculateCost(Pizza $pizza): int
-{
-    if ($pizza->isValid())
-    {
-        return $pizza->getPrice();
-    }
-    else
-    {
-        throw new \RuntimeException('compuster says no');
-    }
-}
-
 /**
  * big controller function that orders a series of pizzas for a series of customers.
  */
 function orderPizzaAll()
 {
+    //define a group of customers and pizzas which we can draw from
+    //TODO: figure out a better way to handle these. Probably encapsulate these in their own classes.
+    $customers = [
+        'Koen' => new Customer('Koen', 'a yacht in Antwerp'),
+        'Manuele' => new Customer('Manuele', 'somewhere in Belgium'),
+        'Students' => new Customer('students', 'BeCode office'),
+    ];
+
+    $pizzas = [
+        'calzone' => new Pizza('calzone', 10),
+        'golden' => new Pizza('golden', 100),
+        'margherita' => new Pizza('margherita', 5),
+        'hawaii' => new Pizza('hawaii', 10, false),
+    ];
+
     try
     {
-        orderPizza(new Pizza('calzone', 10), 'koen');
-        orderPizza(new Pizza('marguerita', 5), 'manuele');
-        orderPizza(new Pizza('golden', 100), 'students');
-        orderPizza(new Pizza('hawaii', 5, false), 'students');
+        orderPizza($pizzas['calzone'], $customers['Koen']);
+        orderPizza($pizzas['margherita'], $customers['Manuele']);
+        orderPizza($pizzas['golden'], $customers['Students']);
+        //TODO: comment out next line after testing, because we do not tolerate pineapple around here.
+//        orderPizza($pizzas['hawaii'], $customers['Students']);
     }
     catch (Exception $e)
     {
